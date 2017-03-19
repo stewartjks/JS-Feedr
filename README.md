@@ -32,7 +32,7 @@ __Feed sources:__
 Give the user the ability to pull from a multiple news sources. Here are a few news sources we suggest:
 
 - [Reddit](https://www.reddit.com/dev/api)
-- [The Guardian](http://open-platform.theguardian.com/access/) 
+- [The Guardian](http://open-platform.theguardian.com/access/)
 - [Hacker News](https://github.com/HackerNews/API)
 - [Daily WTF](http://thedailywtf.com/articles/tdwtf-api)
 - [newsapi.org](https://newsapi.org) (republishes a number of news sources)
@@ -72,11 +72,14 @@ requirements:
 
 __Feed rules:__
 
-- When the application first loads display the loading container (see below on
-  instructions to toggle this). When you successfully retrieve information from
-  the default API hide the loader and replace the content of the `#main`
-  container with that of the API. The DOM structure of each article must adhere
-  to the `.article` structure.
+- When the application first loads, display the loading container. When you
+  successfully retrieve information from the default API hide the loader and
+  replace the content of the `#main` container with that of the API. The DOM
+  structure of each article must adhere to the `.article` structure.
+    - When the app is first loading and when the user selects to load a new feed
+      from the dropdown, display the `#popUp` container with the `.loader` class.
+      You can toggle the `.hidden` class from the container to display/hide the
+      overlay container.
 - When the user selects an article's title show the `#popUp` overlay. The
   content of the article must be inserted in the `.container` class inside
   `#popUp`. Make sure you remove the `.loader` class when toggling the article
@@ -97,10 +100,6 @@ __Additional UI interaction rules:__
   search input box is already expanded tapping the search icon again will close
   the input. Pressing the "Enter" key should also close the opened input box.
   _See Bonus 2 for search filtering functionality._
-- When the app is first loading and when the user selects to load a new feed
-  from the dropdown, display the `#popUp` container with the `.loader` class.
-  You can toggle the `.hidden` class from the container to display/hide the
-  overlay container.
 - Add functionality to hide the pop-up when user selects the "X" button on the
   pop-up.
 - Clicking/tapping the "Feedr" logo will display the main/default feed.
@@ -153,7 +152,7 @@ git commit -m "A description of what was added"
 git push -u origin master
 ```
 
-Here are some sugestions on where to start:
+Here are some suggestions on where to start:
 
 - Start by adding all the DOM functionality first.
 - Map out all of the needed fields/properties from each respective feed.
@@ -187,6 +186,6 @@ Here are some sugestions on where to start:
 
 When your project is complete, copy the code to your github.io repo and send the link to Nicole and Sasha.
 
-If you'd like to schedule a 30-minute code review, let Nicole and Sasha know. This is an opportunity for you to demonstrate your app and explain how you coded it, and for the instructional team to give you feedback on what you did well as well as things you might consider doing differently or adding for your future coding projects. 
+If you'd like to schedule a 30-minute code review, let Nicole and Sasha know. This is an opportunity for you to demonstrate your app and explain how you coded it, and for the instructional team to give you feedback on what you did well as well as things you might consider doing differently or adding for your future coding projects.
 
 A code review is optional, so if you'd like to participate in one, it is up to you to contact Nicole and Sasha to schedule it once your project is done.
