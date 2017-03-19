@@ -11,7 +11,7 @@ $( document ).ready(function () {
 
 // Call News API
   // Define request variables for Hacker News
-  var api_key = 'fc21c0fe480a415c9fc30d8b0b6ca448';
+  var api_key = config.api_key;
   var source = 'hacker-news';
   var sortBy = 'top';
   var requestEndpoint = 'https://newsapi.org/v1/articles?';
