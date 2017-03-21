@@ -20,8 +20,11 @@ function httpGet(source, defaultImageUrl) {
         document.getElementById('popUp').className = 'loader';
     }
     else if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        // Hide loader animation
-        document.getElementById('popUp').className = 'loader hidden';
+        // Remove existing articles from 'main' content container
+        var articleContainer = document.getElementById('main');
+        while ( articleContainer.hasChildNodes() ) {
+        articleContainer.removeChild(articleContainer.lastChild);
+        }
 
         // Iterate over set of articles received
         var responseObject = JSON.parse(xmlHttp.response);
@@ -33,7 +36,7 @@ function httpGet(source, defaultImageUrl) {
             var newArticleImageContainer = document.createElement('section');
             newArticleImageContainer.className = 'featuredImage';
             var newArticleImage = document.createElement('img');
-            if (article.urlToImage !== null ) {
+            if (article.urlToImage !== null && article.urlToImage !== '') {
               newArticleImage.setAttribute('src', article.urlToImage);
             }
             else {
@@ -66,9 +69,11 @@ function httpGet(source, defaultImageUrl) {
             newArticle.appendChild(newArticleClearfix);
 
             // Append new article to 'main' content container
-            var articleContainer = document.getElementById('main');
             articleContainer.appendChild(newArticle);
         });
+
+        // Hide loader animation
+        document.getElementById('popUp').className = 'loader hidden';
       }
       // Add an error message (either alert or a notification on the page) if the app cannot load from the selected feed.
       else if (xmlHttp.readyState === 4 && xmlHttp.status !== 200) {
@@ -81,19 +86,6 @@ function httpGet(source, defaultImageUrl) {
   xmlHttp.open("GET", requestUrl, true);
   xmlHttp.send(null);
 };
-
-/*
-When the user selects a source from the dropdown menu on the header, replace
-the content of the page with articles from the newly selected source. Display
-the loading pop up when the user first selects the new source, and hide it on
-success.
-*/
-
-var sourceCollection = document.getElementById('sourceList').getElementsByTagName('a');
-var sourceArray = Array.from(sourceCollection);
-sourceArray.forEach(function (sourceLink) {
-  sourceLink.addEventListener('click', getRequest(sourceLink.id), false);
-});
 
 function getRequest (sourceName) {
 // HTTP Request Parameters by Source
@@ -109,44 +101,79 @@ function getRequest (sourceName) {
 
  // If the id of the source link matches one of the three source IDs, run a GET request for that source
   if (sourceName === source_HN) {
-   console.log(sourceName);
    httpGet(source_HN, defaultImageUrl_HN);
   }
   else if (sourceName === source_FT) {
-   console.log(sourceName);
    httpGet(source_FT, defaultImageUrl_FT);
   }
   else if (sourceName === source_Recode) {
-   console.log(sourceName);
    httpGet(source_Recode, defaultImageUrl_Recode);
   }
 }
+
+/* When the user selects a source from the dropdown menu on the header, replace
+the content of the page with articles from the newly selected source. Display
+the loading pop up when the user first selects the new source, and hide it on
+success. */
+(function listenForSourceClicks () {
+  var sourceCollection = document.getElementById('sourceList').getElementsByTagName('a');
+  var sourceArray = Array.from(sourceCollection);
+  sourceArray.forEach(function (sourceLink) {
+    sourceLink.addEventListener('click', getRequest.bind(null, sourceLink.id), false);
+  });
+})();
+
+// Add return to home functionality to Feedr nav logo
+(function listenForLogoClicks () {
+  var articleContainer = document.querySelector('section#main');
+  var logoLink = document.querySelector('header section.container a');
+  // Listen for clicks
+  logoLink.addEventListener('click', function returnToMain () {
+    while (articleContainer.hasChildNodes()) {
+      articleContainer.removeChild(articleContainer.lastChild);
+    }
+  }, false);
+})();
+
+/* b) When user clicks article title, show #popUp overlay */
+(function listenForArticleClicks () {
+  // Select article links
+  var articleLinks = document.querySelectorAll('section.articleContent a');
+  // Add listener
+  articleLinks.forEach(function (articleLink) {
+    articleLink.addEventListener('click', function displayLoader () {
+      var loaderPopUp = document.querySelector('div#popUp')
+      return loaderPopUp.className = 'loader';
+    }, false);
+  });
+})();
+
+(function listenForPopUpClose () {
+  var popUpCloseButton = document.querySelector('div#popUp a.closePopUp');
+  popUpCloseButton.addEventListener('click', function popUpCloser () {
+    var loaderPopUp = document.querySelector('div#popUp')
+    return loaderPopUp.className = 'loader hidden';
+  }, false);
+})();
 
 // 1. Broken Scripts:
 /* a) When the user clicks/taps the search icon, expand the input box. Best approach
 for this is to toggle the `.active` class for the `#search` container. If the
 search input box is already expanded tapping the search icon again will close
 the input. */
-// var searchContainer = document.getElementById('search');
-// var searchIcon = searchContainer.getElementsByTagName('a')[0];
-// searchIcon.addEventListener('click', function () {
-//   if (searchContainer.className === 'active') {
-//     searchContainer.className = '';
-//   }
-//   else {
-//     searchContainer.className === 'active';
-//   }
-// }, false);
-// Pressing the "Enter" key should also close the opened input box.
 
-// b) When user selects article title, show #popUp` overlay
-// var articleLinks = document.getElementsByClassName('articleLink');
-// console.log(articleLinks);
-// addEventListener('mouseover', function () {
-  // document.getElementById('popUp').className.replace( /(?:^|\s)hidden(?!\S)/g , '' );
-// });
+/* var searchContainer = document.getElementById('search');
+var searchIcon = searchContainer.getElementsByTagName('a')[0];
+searchIcon.addEventListener('click', function () {
+  if (searchContainer.className === 'active') {
+    searchContainer.className = '';
+  }
+  else {
+    searchContainer.className === 'active';
+  }
+}, false);
+Pressing the "Enter" key should also close the opened input box. */
 
-// 2. __Additional UI interaction rules:__
-/* - Add functionality to hide the pop-up when user selects the "X" button on the
-  pop-up.
+/*
+2. __Additional UI interaction rules:__
 - Clicking/tapping the "Feedr" logo will display the main/default feed. */
