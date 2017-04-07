@@ -16,71 +16,70 @@ function httpGet(source, defaultImageUrl) {
 
   xmlHttp.onreadystatechange = function() {
   // Once API call is complete, display results
-    if (xmlHttp.readyState < 4) {
+      if (xmlHttp.readyState < 4) {
         document.getElementById('popUp').className = 'loader';
-    }
-    else if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        // Remove existing articles from 'main' content container
+      }
+      else if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+        // Hide existing articles
         var articleContainer = document.getElementById('main');
-        while ( articleContainer.hasChildNodes() ) {
-        articleContainer.removeChild(articleContainer.lastChild);
-        }
+        var articles = articleContainer.querySelectorAll('article:not(hidden)');
+        articles.className += 'hidden';
+      }
+      // Iterate over set of articles received
+      var responseObject = JSON.parse(xmlHttp.response);
+      responseObject.articles.forEach(function (article) {
+          var newArticle = document.createElement('article');
+          newArticle.className = 'new article';
 
-        // Iterate over set of articles received
-        var responseObject = JSON.parse(xmlHttp.response);
-        responseObject.articles.forEach(function (article) {
-            var newArticle = document.createElement('article');
-            newArticle.className = 'article';
+          // Create image container for article
+          var newArticleImageContainer = document.createElement('section');
+          newArticleImageContainer.className = 'featuredImage';
+          var newArticleImage = document.createElement('img');
+          if (article.urlToImage !== null && article.urlToImage !== '') {
+            newArticleImage.setAttribute('src', article.urlToImage);
+          }
+          else {
+            newArticleImage.setAttribute('src', defaultImageUrl);
+          }
+          newArticleImageContainer.appendChild(newArticleImage);
 
-            // Create image container for article
-            var newArticleImageContainer = document.createElement('section');
-            newArticleImageContainer.className = 'featuredImage';
-            var newArticleImage = document.createElement('img');
-            if (article.urlToImage !== null && article.urlToImage !== '') {
-              newArticleImage.setAttribute('src', article.urlToImage);
-            }
-            else {
-              newArticleImage.setAttribute('src', defaultImageUrl);
-            }
-            newArticleImageContainer.appendChild(newArticleImage);
+          // Create content container for article
+          var newArticleContent = document.createElement('section');
+          newArticleContent.className = 'articleContent';
+          var newArticleLink = document.createElement('a');
+          newArticleLink.className = 'articleLink';
+          newArticleLink.setAttribute('href', article.url);
+          var newArticleTitleContainer = document.createElement('h3');
+          var newArticleTitle = document.createTextNode(article.title);
+          newArticleTitleContainer.appendChild(newArticleTitle);
+          newArticleLink.appendChild(newArticleTitleContainer);
+          newArticleContent.appendChild(newArticleLink);
 
-            // Create content container for article
-            var newArticleContent = document.createElement('section');
-            newArticleContent.className = 'articleContent';
-            var newArticleLink = document.createElement('a');
-            newArticleLink.className = 'articleLink';
-            newArticleLink.setAttribute('href', article.url);
-            var newArticleTitleContainer = document.createElement('h3');
-            var newArticleTitle = document.createTextNode(article.title);
-            newArticleTitleContainer.appendChild(newArticleTitle);
-            newArticleLink.appendChild(newArticleTitleContainer);
-            newArticleContent.appendChild(newArticleLink);
+          // Create impressions counter for article
+          var newArticleImpressionsCount = document.createElement('section');
+          newArticleImpressionsCount.className = 'impressions';
+          var newArticleClearfix = document.createElement('div');
+          newArticleClearfix.className = 'clearfix';
 
-            // Create impressions counter for article
-            var newArticleImpressionsCount = document.createElement('section');
-            newArticleImpressionsCount.className = 'impressions';
-            var newArticleClearfix = document.createElement('div');
-            newArticleClearfix.className = 'clearfix';
+          // Append components to new article
+          newArticle.appendChild(newArticleImageContainer);
+          newArticle.appendChild(newArticleContent);
+          newArticle.appendChild(newArticleImpressionsCount);
+          newArticle.appendChild(newArticleClearfix);
 
-            // Append components to new article
-            newArticle.appendChild(newArticleImageContainer);
-            newArticle.appendChild(newArticleContent);
-            newArticle.appendChild(newArticleImpressionsCount);
-            newArticle.appendChild(newArticleClearfix);
+          // Append new article to 'main' content container
+          articleContainer.appendChild(newArticle);
+      });
 
-            // Append new article to 'main' content container
-            articleContainer.appendChild(newArticle);
-        });
-
-        // Hide loader animation
-        document.getElementById('popUp').className = 'loader hidden';
+      // Hide loader animation
+      document.getElementById('popUp').className = 'loader hidden';
       }
       // Add an error message (either alert or a notification on the page) if the app cannot load from the selected feed.
       else if (xmlHttp.readyState === 4 && xmlHttp.status !== 200) {
-        // Hide loader animation
-        document.getElementById('popUp').className = 'loader hidden';
-        // Alert user of error
-        alert('Sorry, this news source is temporarily unavailable. Please try another one.');
+      // Hide loader animation
+      document.getElementById('popUp').className = 'loader hidden';
+      // Alert user of error
+      alert('Sorry, this news source is temporarily unavailable. Please try another one.');
       }
   }
   xmlHttp.open("GET", requestUrl, true);
@@ -119,6 +118,7 @@ success. */
   var sourceCollection = document.getElementById('sourceList').getElementsByTagName('a');
   var sourceArray = Array.from(sourceCollection);
   sourceArray.forEach(function (sourceLink) {
+    // When source button clicked, run getRequest function with 'this' set to null and source's id as argument
     sourceLink.addEventListener('click', getRequest.bind(null, sourceLink.id), false);
   });
 })();
@@ -129,8 +129,12 @@ success. */
   var logoLink = document.querySelector('header section.container a');
   // Listen for clicks
   logoLink.addEventListener('click', function returnToMain () {
-    while (articleContainer.hasChildNodes()) {
-      articleContainer.removeChild(articleContainer.lastChild);
+      var defaultArticles_Hidden = articleContainer.querySelectorAll('article.hidden:not(new)');
+      var newArticles = articleContainer.querySelectorAll('article.new:not(hidden)');
+      // Hide new articles
+      newArticles.className += 'hidden';
+      // Show default articles
+      newArticles.classList.remove('hidden');
     }
   }, false);
 })();
@@ -156,24 +160,29 @@ success. */
   }, false);
 })();
 
-// 1. Broken Scripts:
-/* a) When the user clicks/taps the search icon, expand the input box. Best approach
-for this is to toggle the `.active` class for the `#search` container. If the
-search input box is already expanded tapping the search icon again will close
-the input. */
+// When the user clicks/taps the search icon, expand the input box.
 
-/* var searchContainer = document.getElementById('search');
-var searchIcon = searchContainer.getElementsByTagName('a')[0];
-searchIcon.addEventListener('click', function () {
-  if (searchContainer.className === 'active') {
-    searchContainer.className = '';
-  }
-  else {
-    searchContainer.className === 'active';
-  }
-}, false);
-Pressing the "Enter" key should also close the opened input box. */
-
-/*
-2. __Additional UI interaction rules:__
-- Clicking/tapping the "Feedr" logo will display the main/default feed. */
+(function listenForSearchIconClicks () {
+  var searchIconLink = document.querySelector('header section#search a');
+  var searchBoxContainer = document.querySelector('header section#search');
+  var sourcesDropdown = document.querySelector('header section.container nav li');
+  searchIconLink.addEventListener('click', function () {
+    if (searchBoxContainer.className === 'active') {
+      searchBoxContainer.className = '';
+      sourcesDropdown.classList.remove('hidden');
+    }
+    // If the search input box is already expanded, tapping the search icon again will close the input.
+    else {
+      searchBoxContainer.className = 'active';
+      sourcesDropdown.className += 'hidden';
+    }
+  }, false);
+  // Pressing the "Enter" key should close the opened input box.
+  searchIconLink.addEventListener('keypress', function (e) {
+    var keyFired = e.which || e.keyCode;
+    if (keyFired === 13 && searchBoxContainer.className === 'active') {
+      searchBoxContainer.className = '';
+      sourcesDropdown.classList.remove('hidden');
+    }
+  })
+})();
