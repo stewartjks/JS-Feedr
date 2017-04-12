@@ -20,13 +20,16 @@ function httpGet(source, defaultImageUrl) {
         document.getElementById('popUp').className = 'loader';
     }
     else if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        // Remove existing articles from 'main' content container
+        // Hide existing articles from 'main' content container
         var articleContainer = document.getElementById('main');
-        while ( articleContainer.hasChildNodes() ) {
-        articleContainer.removeChild(articleContainer.lastChild);
-        }
+        var staleArticles = articleContainer.querySelectorAll('article:not(hidden)');
+        staleArticles.forEach(
+          function(article) {
+            article.className += ' hidden'
+          }
+        );
 
-        // Iterate over set of articles received
+        // Convert the response to an object and iterate over elements in 'articles' property
         var responseObject = JSON.parse(xmlHttp.response);
         responseObject.articles.forEach(function (article) {
             var newArticle = document.createElement('article');
@@ -127,12 +130,23 @@ success. */
 (function listenForLogoClicks () {
   var articleContainer = document.querySelector('section#main');
   var logoLink = document.querySelector('header section.container a');
-  // Listen for clicks
+  // Clicking/tapping the "Feedr" logo will display the main/default feed.
   logoLink.addEventListener('click', function returnToMain () {
-    while (articleContainer.hasChildNodes()) {
-      articleContainer.removeChild(articleContainer.lastChild);
-    }
-  }, false);
+    // Hide existing articles from 'main' content container
+    var articleContainer = document.getElementById('main');
+    var staleArticles = articleContainer.querySelectorAll('article:not(hidden):not(original)');
+    var originalArticles = articleContainer.querySelectorAll('article.original');
+    staleArticles.forEach(
+        function hideArticle (article) {
+          article.className += ' hidden';
+        }
+    );
+    originalArticles.forEach(
+      function showArticle (article) {
+        article.classList.remove('hidden');
+      }
+    );
+  });
 })();
 
 /* b) When user clicks article title, show #popUp overlay */
@@ -156,24 +170,28 @@ success. */
   }, false);
 })();
 
-// 1. Broken Scripts:
-/* a) When the user clicks/taps the search icon, expand the input box. Best approach
-for this is to toggle the `.active` class for the `#search` container. If the
-search input box is already expanded tapping the search icon again will close
-the input. */
-
-/* var searchContainer = document.getElementById('search');
-var searchIcon = searchContainer.getElementsByTagName('a')[0];
-searchIcon.addEventListener('click', function () {
-  if (searchContainer.className === 'active') {
-    searchContainer.className = '';
-  }
-  else {
-    searchContainer.className === 'active';
-  }
-}, false);
-Pressing the "Enter" key should also close the opened input box. */
-
-/*
-2. __Additional UI interaction rules:__
-- Clicking/tapping the "Feedr" logo will display the main/default feed. */
+// When the user clicks/taps the search icon, expand the input box.
+(function listenForSearchIconClicks () {
+  var searchIconLink = document.querySelector('header section#search a');
+  var searchBoxContainer = document.querySelector('header section#search');
+  var sourcesDropdown = document.querySelector('header section.container nav li');
+  searchIconLink.addEventListener('click', function () {
+    if (searchBoxContainer.className === 'active') {
+      searchBoxContainer.className = '';
+      sourcesDropdown.classList.remove('hidden');
+    }
+    // If the search input box is already expanded, tapping the search icon again will close the input.
+    else {
+      searchBoxContainer.className = 'active';
+      sourcesDropdown.className += 'hidden';
+    }
+  }, false);
+  // Pressing the "Enter" key should close the opened input box.
+  searchIconLink.addEventListener('keypress', function (e) {
+    var keyFired = e.which || e.keyCode;
+    if (keyFired === 13 && searchBoxContainer.className === 'active') {
+      searchBoxContainer.className = '';
+      sourcesDropdown.classList.remove('hidden');
+    }
+  })
+})();
