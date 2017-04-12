@@ -127,7 +127,7 @@ success. */
 (function listenForLogoClicks () {
   var articleContainer = document.querySelector('section#main');
   var logoLink = document.querySelector('header section.container a');
-  // Listen for clicks
+  // listen for clicks
   logoLink.addEventListener('click', function returnToMain () {
       var defaultArticles_Hidden = articleContainer.querySelectorAll('article.hidden:not(new)');
       var newArticles = articleContainer.querySelectorAll('article.new:not(hidden)');
