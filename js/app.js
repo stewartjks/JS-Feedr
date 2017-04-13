@@ -24,9 +24,7 @@ function httpGet(source, defaultImageUrl) {
         var articleContainer = document.getElementById('main');
         var staleArticles = articleContainer.querySelectorAll('article:not(hidden)');
         staleArticles.forEach(
-          function(article) {
-            article.className += ' hidden'
-          }
+          function(article) {article.className += ' hidden';}
         );
 
         // Convert the response to an object and iterate over elements in 'articles' property
@@ -121,6 +119,7 @@ success. */
 (function listenForSourceClicks () {
   var sourceCollection = document.getElementById('sourceList').getElementsByTagName('a');
   var sourceArray = Array.from(sourceCollection);
+  // If menu item is clicked, fire getRequest with menu item as argument
   sourceArray.forEach(function (sourceLink) {
     sourceLink.addEventListener('click', getRequest.bind(null, sourceLink.id), false);
   });
